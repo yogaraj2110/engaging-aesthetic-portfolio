@@ -3,12 +3,11 @@ name: Deploy React Build to S3
 on:
   push:
     branches:
-      - main  # Change this if your default branch is different  
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -22,18 +21,16 @@ jobs:
         run: npm install
 
       - name: Build React App
-        run: npm run build
+        run: |
+          npm run build
+          ls -la ./build || echo "❌ Build folder is missing!"
 
-      # Debug: Check if the build directory exists
-      - name: Debug Build Directory
-        run: ls -la
+      - name: Debug GitHub Runner Storage
+        run: df -h  # Check if storage is full
 
-      - name: Debug Inside Build Folder
-        run: ls -la ./build || echo "❌ Build folder is missing!"
-
-      # Ensure the build directory exists before uploading
-      - name: Ensure Build Directory Exists
-        run: mkdir -p build
+      - name: Show Build Logs
+        if: failure()
+        run: cat npm-debug.log || echo "No build errors logged"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -44,7 +41,3 @@ jobs:
 
       - name: Upload Build to S3 with Versioning
         run: aws s3 cp --recursive ./build s3://${{ secrets.S3_BUCKET_NAME }}/builds/$(date +%Y%m%d%H%M%S)/
-
-      # Debug: Confirm files uploaded successfully
-      - name: Verify S3 Upload
-        run: aws s3 ls s3://${{ secrets.S3_BUCKET_NAME }}/builds/

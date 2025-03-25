@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,6 +24,17 @@ jobs:
       - name: Build React App
         run: npm run build
 
+      # Debug: Check if the build directory exists
+      - name: Debug Build Directory
+        run: ls -la
+
+      - name: Debug Inside Build Folder
+        run: ls -la ./build || echo "❌ Build folder is missing!"
+
+      # Ensure the build directory exists before uploading
+      - name: Ensure Build Directory Exists
+        run: mkdir -p build
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -32,3 +44,7 @@ jobs:
 
       - name: Upload Build to S3 with Versioning
         run: aws s3 cp --recursive ./build s3://${{ secrets.S3_BUCKET_NAME }}/builds/$(date +%Y%m%d%H%M%S)/
+
+      # Debug: Confirm files uploaded successfully
+      - name: Verify S3 Upload
+        run: aws s3 ls s3://${{ secrets.S3_BUCKET_NAME }}/builds/

@@ -3,11 +3,12 @@ name: Deploy React Build to S3
 on:
   push:
     branches:
-      - main
+      - main  # Trigger deployment on push to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -15,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 18  # Change Node.js version if needed
 
       - name: Install Dependencies
         run: npm install
@@ -28,7 +29,7 @@ jobs:
       - name: Debug GitHub Runner Storage
         run: df -h  # Check if storage is full
 
-      - name: Show Build Logs
+      - name: Show Build Logs (If Build Fails)
         if: failure()
         run: cat npm-debug.log || echo "No build errors logged"
 
@@ -39,5 +40,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Upload Build to S3 with Versioning
-        run: aws s3 cp --recursive ./dist s3://${{ secrets.S3_BUCKET_NAME }}/builds/$(date +%Y%m%d%H%M%S)/
+      # ✅ Upload Latest Build to S3 (Root)
+      - name: Upload Latest Build to S3 (Root)
+        run: aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }}/ --delete

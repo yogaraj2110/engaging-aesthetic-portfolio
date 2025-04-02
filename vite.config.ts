@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
   ].filter(Boolean),
   base: '/',
+  build: {
+    outDir: 'dist', // default
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

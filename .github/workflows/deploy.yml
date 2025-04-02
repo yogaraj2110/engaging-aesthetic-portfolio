@@ -23,7 +23,7 @@ jobs:
       - name: Build React App
         run: |
           npm run build
-          ls -la ./build || echo "❌ Build folder is missing!" 
+          ls -la ./dist || echo "❌ Build folder is missing!" 
 
       - name: Debug GitHub Runner Storage
         run: df -h  # Check if storage is full
@@ -40,4 +40,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Upload Build to S3 with Versioning
-        run: aws s3 cp --recursive ./build s3://${{ secrets.S3_BUCKET_NAME }}/builds/$(date +%Y%m%d%H%M%S)/
+        run: aws s3 cp --recursive ./dist s3://${{ secrets.S3_BUCKET_NAME }}/builds/$(date +%Y%m%d%H%M%S)/
